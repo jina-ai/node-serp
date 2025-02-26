@@ -46,8 +46,9 @@ async function main() {
   };
 
   try {
-    const results = await searchSimulator(searchParams);
-    console.log(JSON.stringify(results, null, 2));
+    const response = await searchSimulator(searchParams);
+    console.log('Results:', JSON.stringify(response.results, null, 2));
+    console.log('\nToken Usage:', response.usage);
   } catch (error) {
     console.error('Error:', error);
   }

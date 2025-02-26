@@ -1,5 +1,3 @@
-import type { LanguageModelUsage, NoObjectGeneratedError } from 'ai';
-
 export interface SearchParams {
   q: string;
   gl?: string;
@@ -16,5 +14,12 @@ export interface SearchResult {
   position: number;
 }
 
-// Re-export types from 'ai' package
-export type { LanguageModelUsage, NoObjectGeneratedError }; 
+export interface SearchResponse {
+  results: SearchResult[];
+  usage: {
+    prompt: number;
+    completion: number;
+    total: number;
+  };
+}
+

@@ -1,8 +1,8 @@
-import { SearchParams, SearchResult } from './types';
+import { SearchParams, SearchResult, SearchResponse } from './types';
 import { z } from 'zod';
 import { ObjectGeneratorSafe } from './tools';
 
-export async function searchSimulator(params: SearchParams): Promise<SearchResult[]> {
+export async function searchSimulator(params: SearchParams): Promise<SearchResponse> {
   const generator = new ObjectGeneratorSafe();
 
   const maxResults = params.num || 10;
@@ -41,7 +41,7 @@ Your task is to generate search results that look like real web pages. Each resu
 - Page: ${params.page || 1}`;
 
   try {
-    const { object: results } = await generator.generateObject({
+    const response = await generator.generateObject({
       model: 'gemini',
       schema: searchResultSchema,
       system: systemPrompt,
@@ -51,9 +51,15 @@ Your task is to generate search results that look like real web pages. Each resu
       ]
     });
     
-    return results;
+    return {
+      results: response.object,
+      usage: response.usage
+    };
   } catch (error) {
     console.error("Failed to generate search results:", error);
-    return [];
+    return {
+      results: [],
+      usage: { prompt: 0, completion: 0, total: 0 }
+    };
   }
 } 
