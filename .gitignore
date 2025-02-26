@@ -1,3 +1,33 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build output
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# TypeScript cache
+*.tsbuildinfo
+
 # Logs
 logs
 *.log
@@ -39,14 +69,10 @@ bower_components
 build/Release
 
 # Dependency directories
-node_modules/
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
-
-# TypeScript cache
-*.tsbuildinfo
 
 # Optional npm cache directory
 .npm
@@ -73,11 +99,9 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
-.env
 .env.development.local
 .env.test.local
 .env.production.local
-.env.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
