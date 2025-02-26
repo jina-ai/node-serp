@@ -9,10 +9,18 @@ export async function searchSimulator(params: SearchParams): Promise<SearchResul
   
   const searchResultSchema = z.array(
     z.object({
-      title: z.string().describe('The title of the search result'),
-      link: z.string().url().describe('The URL of the search result'),
-      snippet: z.string().describe('A brief description/snippet of the content'),
-      position: z.number().int().min(1).describe('The position in search results')
+      title: z.string()
+        .describe('The title of the search result')
+        .max(100),
+      link: z.string()
+        .describe('The URL of the search result'),
+      snippet: z.string()
+        .describe('A brief description/snippet of the content')
+        .max(100),
+      position: z.number()
+        .int()
+        .min(1)
+        .describe('The position in search results')
     })
   ).max(maxResults).describe(`Array of search results, limited to ${maxResults} items`);
 
