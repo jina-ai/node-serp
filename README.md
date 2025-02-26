@@ -28,6 +28,14 @@ npm run search -- \
   --hl "en" \
   --num 5 \
   --page 1
+
+# Chinese search example
+npm run search -- \
+  --q "北京最好的火锅" \
+  --gl "CN" \
+  --location "北京" \
+  --hl "zh" \
+  --num 5
 ```
 
 ## Parameters
