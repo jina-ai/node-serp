@@ -46,9 +46,9 @@ const google = createGoogleGenerativeAI({
 export function getModel(tool: ToolName) {
   switch (tool) {
     case 'gemini':
-      return google('gemini-2.0-flash');
+      return google('gemini-2.0-flash-lite');
     case 'fallback':
-      return google('gemini-2.0-flash');
+      return google('gemini-2.0-flash-lite');
     default:
       throw new Error(`Unknown tool: ${tool}`);
   }
