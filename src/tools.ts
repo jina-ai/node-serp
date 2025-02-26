@@ -1,12 +1,6 @@
 import { z } from 'zod';
-import {generateObject, LanguageModelUsage, NoObjectGeneratedError} from "ai";
-import { TokenTracker } from "./token-tracker";
+import { generateObject, LanguageModelUsage, NoObjectGeneratedError } from "ai";
 import { getModel, ToolName, getToolConfig } from "./config";
-
-interface GenerateObjectResult<T> {
-  object: T;
-  usage: LanguageModelUsage;
-}
 
 interface GenerateOptions<T> {
   model: ToolName;
@@ -17,13 +11,7 @@ interface GenerateOptions<T> {
 }
 
 export class ObjectGeneratorSafe {
-  private tokenTracker: TokenTracker;
-
-  constructor(tokenTracker?: TokenTracker) {
-    this.tokenTracker = tokenTracker || new TokenTracker();
-  }
-
-  async generateObject<T>(options: GenerateOptions<T>): Promise<GenerateObjectResult<T>> {
+  async generateObject<T>(options: GenerateOptions<T>) {
     const {
       model,
       schema,
@@ -34,7 +22,7 @@ export class ObjectGeneratorSafe {
 
     try {
       // Primary attempt with main model
-      const result = await generateObject({
+      return await generateObject({
         model: getModel(model),
         schema,
         prompt,
@@ -44,57 +32,34 @@ export class ObjectGeneratorSafe {
         temperature: getToolConfig(model).temperature,
       });
 
-      this.tokenTracker.trackUsage(model, result.usage);
-      return result;
-
     } catch (error) {
       // First fallback: Try manual JSON parsing of the error response
       try {
-        const errorResult = await this.handleGenerateObjectError<T>(error);
-        this.tokenTracker.trackUsage(model, errorResult.usage);
-        return errorResult;
-
+        if (NoObjectGeneratedError.isInstance(error)) {
+          console.error('Object not generated according to schema, fallback to manual JSON parsing');
+          const partialResponse = JSON.parse((error as any).text);
+          return {
+            object: partialResponse as T,
+            usage: (error as any).usage,
+            finishReason: 'error' as const
+          };
+        }
+        throw error;
       } catch (parseError) {
-        // Second fallback: Try with fallback model if provided
+        // Second fallback: Try with fallback model
         if (NoObjectGeneratedError.isInstance(parseError)) {
           const failedOutput = (parseError as any).text;
-          console.error(`${model} failed on object generation ${failedOutput} -> manual parsing failed again -> trying fallback model`);
-          try {
-            const fallbackResult = await generateObject({
-              model: getModel('fallback'),
-              schema,
-              prompt: `Extract the desired information from this text: \n ${failedOutput}`,
-              maxTokens: getToolConfig('fallback').maxTokens,
-              temperature: getToolConfig('fallback').temperature,
-            });
-
-            this.tokenTracker.trackUsage('fallback', fallbackResult.usage);
-            return fallbackResult;
-          } catch (fallbackError) {
-            // If fallback model also fails, try parsing its error response
-            return await this.handleGenerateObjectError<T>(fallbackError);
-          }
+          console.error(`${model} failed -> trying fallback model`);
+          return await generateObject({
+            model: getModel('fallback'),
+            schema,
+            prompt: `Extract the desired information from this text: \n ${failedOutput}`,
+            maxTokens: getToolConfig('fallback').maxTokens,
+            temperature: getToolConfig('fallback').temperature,
+          });
         }
-
-        // If no fallback model or all attempts failed, throw the original error
         throw error;
       }
     }
-  }
-
-  private async handleGenerateObjectError<T>(error: unknown): Promise<GenerateObjectResult<T>> {
-    if (NoObjectGeneratedError.isInstance(error)) {
-      console.error('Object not generated according to schema, fallback to manual JSON parsing');
-      try {
-        const partialResponse = JSON.parse((error as any).text);
-        return {
-          object: partialResponse as T,
-          usage: (error as any).usage
-        };
-      } catch (parseError) {
-        throw error;
-      }
-    }
-    throw error;
   }
 } 

@@ -1,3 +1,5 @@
+import type { LanguageModelUsage, NoObjectGeneratedError } from 'ai';
+
 export interface SearchParams {
   q: string;
   gl?: string;
@@ -14,18 +16,5 @@ export interface SearchResult {
   position: number;
 }
 
-export interface LanguageModelUsage {
-  prompt: number;
-  completion: number;
-  total: number;
-}
-
-export class NoObjectGeneratedError extends Error {
-  constructor(public text: string, public usage: LanguageModelUsage) {
-    super('Failed to generate object according to schema');
-  }
-
-  static isInstance(error: unknown): error is NoObjectGeneratedError {
-    return error instanceof NoObjectGeneratedError;
-  }
-} 
+// Re-export types from 'ai' package
+export type { LanguageModelUsage, NoObjectGeneratedError }; 

@@ -10,9 +10,9 @@
     "search": "ts-node src/index.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^1.1.17",
+    "@ai-sdk/google": "^1.0.0",
     "@ai-sdk/openai": "^1.1.9",
-    "ai": "^2.2.36",
+    "ai": "^4.1.26",
     "dotenv": "^16.4.1",
     "yargs": "^17.7.2",
     "zod": "^3.22.4"

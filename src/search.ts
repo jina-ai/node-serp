@@ -1,11 +1,9 @@
 import { SearchParams, SearchResult } from './types';
 import { z } from 'zod';
 import { ObjectGeneratorSafe } from './tools';
-import { TokenTracker } from './token-tracker';
 
 export async function searchSimulator(params: SearchParams): Promise<SearchResult[]> {
-  const tokenTracker = new TokenTracker();
-  const generator = new ObjectGeneratorSafe(tokenTracker);
+  const generator = new ObjectGeneratorSafe();
 
   const maxResults = params.num || 10;
   
