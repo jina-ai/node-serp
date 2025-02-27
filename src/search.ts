@@ -1,17 +1,17 @@
 import { SearchParams, SearchResponse } from './types';
 import { z } from 'zod';
 import { ObjectGeneratorSafe } from './tools';
+import { KNOWLEDGE_CUTOFF } from './config';
 
 export async function searchSimulator(params: SearchParams): Promise<SearchResponse> {
   const generator = new ObjectGeneratorSafe();
   const maxResults = params.num || 10;
-  const knowledgeCutoff = params.knowledgeCutoff || 'October 2024';
   
   // Enhanced schema with stronger restrictions and more realistic snippet generation
   const searchResultSchema = z.array(
     z.object({
       title: z.string()
-        .describe(`The title of the search result - must be factual and based on real websites that existed as of ${knowledgeCutoff}. No fictional sites.`)
+        .describe(`The title of the search result - must be factual and based on real websites that existed as of ${KNOWLEDGE_CUTOFF}. No fictional sites.`)
         .min(5)
         .max(100),
       link: z.string()
@@ -21,10 +21,11 @@ export async function searchSimulator(params: SearchParams): Promise<SearchRespo
         - News sites: https://www.theguardian.com/technology/2023/nov/15/ai-regulation-global-summit (real date/category/slug)
         - Government sites: https://www.cdc.gov/coronavirus/2019-ncov/index.html (authentic paths)
         - Academic: https://arxiv.org/abs/2201.08239 (real paper IDs)
-        Must reflect real websites that existed as of ${knowledgeCutoff}. Must be a properly formatted URL without placeholder terms like 'example'.`)
+        Must reflect real websites that existed as of ${KNOWLEDGE_CUTOFF}. Must be a properly formatted URL without placeholder terms like 'example'.`)
+        .min(10)
         .max(300),
       snippet: z.string()
-        .describe(`A fragment of text from the actual content that CONTAINS THE QUERY TERMS. This is NOT a summary - it's an actual extract where the query terms appear, with those terms surrounded by <b> tags. For example, if the query is "climate change", the snippet might be "...effects of <b>climate change</b> on biodiversity include...". Must be based on factual content available as of ${knowledgeCutoff}.`)
+        .describe(`A fragment of text from the actual content that CONTAINS THE QUERY TERMS. This is NOT a summary - it's an actual extract where the query terms appear, with those terms surrounded by <b> tags. For example, if the query is "climate change", the snippet might be "...effects of <b>climate change</b> on biodiversity include...". Must be based on factual content available as of ${KNOWLEDGE_CUTOFF}.`)
         .min(20)
         .max(300),
       position: z.number()
@@ -33,15 +34,15 @@ export async function searchSimulator(params: SearchParams): Promise<SearchRespo
         .max(maxResults)
         .describe('The position of this result in the SERP (1-based indexing)')
     })
-  ).min(1).max(maxResults).describe(`Generate realistic search engine results limited to ${maxResults} items. Results must be based ONLY on information available as of ${knowledgeCutoff} and reflect what a real search engine would return.`);
+  ).min(1).max(maxResults).describe(`Generate realistic search engine results limited to ${maxResults} items. Results must be based ONLY on information available as of ${KNOWLEDGE_CUTOFF} and reflect what a real search engine would return.`);
 
   // Improved system prompt focused on reducing hallucination and creating realistic snippets
   const systemPrompt = `You are a search engine API that generates realistic and factual search results.
-Your task is to simulate what a real search engine would return for the given query based ONLY on information available as of the knowledge cutoff date (${knowledgeCutoff}).
+Your task is to simulate what a real search engine would return for the given query based ONLY on information available as of the knowledge cutoff date (${KNOWLEDGE_CUTOFF}).
 
 IMPORTANT RULES TO FOLLOW:
-1. Only generate results for real websites and web pages that existed before ${knowledgeCutoff}
-2. Each result must contain factually accurate information known before ${knowledgeCutoff}
+1. Only generate results for real websites and web pages that existed before ${KNOWLEDGE_CUTOFF}
+2. Each result must contain factually accurate information known before ${KNOWLEDGE_CUTOFF}
 3. Include diverse result types: official sites, news articles, blogs, forums, academic sources, etc.
 4. NEVER EVER use placeholder values like "example", "sample", or "placeholder" in URLs
 5. For YouTube URLs, always use actual video IDs (11 characters like "dQw4w9WgXcQ" or "8O_MwlZ2dEk")
@@ -61,10 +62,10 @@ CRITICAL SNIPPET REQUIREMENTS:
 8. If a page is in a different language, provide the snippet in that language with appropriate query term highlighting
 
 SEARCH BEHAVIOR GUIDELINES:
-1. For queries about events after ${knowledgeCutoff}, return only information available up to ${knowledgeCutoff}, showing how a real search engine would handle such queries
+1. For queries about events after ${KNOWLEDGE_CUTOFF}, return only information available up to ${KNOWLEDGE_CUTOFF}, showing how a real search engine would handle such queries
 2. Results for page 2+ should be progressively less relevant but still factual
 3. Respect the specified country, language and location for regional relevance
-4. If uncertain about facts as of ${knowledgeCutoff}, return general topic information rather than potentially incorrect specifics
+4. If uncertain about facts as of ${KNOWLEDGE_CUTOFF}, return general topic information rather than potentially incorrect specifics
 5. Position top-authority sites (Wikipedia, official sites, major news outlets) higher in results when appropriate
 6. For technical queries, prioritize documentation, forums, and educational resources
 7. Mirror real search engine behavior by including appropriate result diversity based on query intent
@@ -82,7 +83,7 @@ This is simulating a production SERP API - your results should be indistinguisha
       location: params.location || 'United States',
       resultsPerPage: maxResults,
       page: params.page || 1,
-      knowledgeCutoffDate: knowledgeCutoff
+      knowledgeCutoffDate: KNOWLEDGE_CUTOFF
     },
     requirements: {
       accuracy: "high", 

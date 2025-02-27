@@ -52,4 +52,6 @@ export function getModel(tool: ToolName) {
     default:
       throw new Error(`Unknown tool: ${tool}`);
   }
-} 
+}
+
+export const KNOWLEDGE_CUTOFF = 'October 2024'; 
