@@ -1,7 +1,7 @@
 import z, { TypeOf } from 'zod';
 
 export const zSearchParams = z.object({
-  q: z.coerce.string(),
+  q: z.string(),
   gl: z.coerce.string().optional(),
   location: z.coerce.string().optional(),
   hl: z.coerce.string().optional(),
