@@ -1,0 +1,9 @@
+{
+    "gemini": {
+        "provider": "google",
+        "options": {
+            "maxTokens": 5000,
+            "temperature": 0.6
+        }
+    }
+}

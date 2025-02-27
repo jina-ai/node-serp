@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { generateObject, LanguageModelUsage, NoObjectGeneratedError } from "ai";
-import { getModel, ToolName, getToolConfig } from "./config";
+import { getModel, getModelConfig } from "./config";
 
 interface GenerateOptions<T> {
-  model: ToolName;
+  model: string;
   schema: z.ZodType<T>;
   prompt?: string;
   system?: string;
@@ -13,13 +13,13 @@ interface GenerateOptions<T> {
 export class ObjectGeneratorSafe {
   async generateObject<T>(options: GenerateOptions<T>) {
     const {
-      model,
+      model: inputModel,
       schema,
       prompt,
       system,
       messages,
     } = options;
-
+    let model: string = inputModel;
     try {
       // Primary attempt with main model
       return await generateObject({
@@ -28,8 +28,8 @@ export class ObjectGeneratorSafe {
         prompt,
         system,
         messages,
-        maxTokens: getToolConfig(model).maxTokens,
-        temperature: getToolConfig(model).temperature,
+        maxTokens: getModelConfig(model).maxTokens,
+        temperature: getModelConfig(model).temperature,
       });
 
     } catch (error) {
@@ -50,12 +50,13 @@ export class ObjectGeneratorSafe {
         if (NoObjectGeneratedError.isInstance(parseError)) {
           const failedOutput = (parseError as any).text;
           console.error(`${model} failed -> trying fallback model`);
+          model = 'gemini';
           return await generateObject({
-            model: getModel('fallback'),
+            model: getModel(model),
             schema,
             prompt: `Extract the desired information from this text: \n ${failedOutput}`,
-            maxTokens: getToolConfig('fallback').maxTokens,
-            temperature: getToolConfig('fallback').temperature,
+            maxTokens: getModelConfig(model).maxTokens,
+            temperature: getModelConfig(model).temperature,
           });
         }
         throw error;

@@ -4,27 +4,15 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-export type ToolName = 'gemini' | 'fallback';
-
-interface ToolConfig {
-  maxTokens: number;
-  temperature: number;
-}
-
-const toolConfigs: Record<ToolName, ToolConfig> = {
-  gemini: {
-    maxTokens: 5000,
-    temperature: 0.6
-  },
-  fallback: {
-    maxTokens: 5000,
-    temperature: 0.6
+interface ModelConfig {
+  provider: string;
+  options: {
+    maxTokens: number;
+    temperature: number;
   }
-};
-
-export function getToolConfig(tool: ToolName): ToolConfig {
-  return toolConfigs[tool];
 }
+
+export const modelConfig = require('../config.json') as Record<string, ModelConfig | undefined>;
 
 // Setup proxy if present
 if (process.env.https_proxy) {
@@ -43,15 +31,28 @@ const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY
 });
 
-export function getModel(tool: ToolName) {
-  switch (tool) {
-    case 'gemini':
-      return google('gemini-2.0-flash-lite');
-    case 'fallback':
-      return google('gemini-2.0-flash-lite');
-    default:
-      throw new Error(`Unknown tool: ${tool}`);
+export function getModel(name: string = 'gemini') {
+  const conf = modelConfig[name];
+  if (!conf) {
+    throw new Error(`Model config not found for ${name}`);
   }
+  if (name === 'gemini') {
+    if (conf.provider === 'vertex') {
+      const createVertex = require('@ai-sdk/google-vertex').createVertex;
+      return createVertex({ project: process.env.GCLOUD_PROJECT })('gemini-2.0-flash-lite');
+    }
+    return google('gemini-2.0-flash-lite');
+  }
+  
+  throw new Error(`Unknown model: ${name}`);
+}
+
+export function getModelConfig(name: string = 'gemini') {
+  const conf = modelConfig[name];
+  if (!conf) {
+    throw new Error(`Model config not found for ${name}`);
+  }
+  return conf.options;
 }
 
 export const KNOWLEDGE_CUTOFF = 'October 2024'; 

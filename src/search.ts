@@ -1,10 +1,11 @@
-import { SearchParams, SearchResponse } from './types';
+import { SearchParams, SearchResponse, zSearchParams } from './types';
 import { z } from 'zod';
 import { ObjectGeneratorSafe } from './tools';
 import { KNOWLEDGE_CUTOFF } from './config';
 
-export async function searchSimulator(params: SearchParams): Promise<SearchResponse> {
+export async function searchSimulator(input: SearchParams): Promise<SearchResponse> {
   const generator = new ObjectGeneratorSafe();
+  const params = zSearchParams.parse(input);
   const maxResults = Math.min(params.num || 10, 30);
   
   // Enhanced schema with stronger restrictions and more realistic snippet generation
@@ -125,3 +126,5 @@ This is simulating a production SERP API - your results should be indistinguisha
     };
   }
 }
+
+export default searchSimulator;
