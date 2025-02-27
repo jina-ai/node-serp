@@ -29,7 +29,7 @@
     "@google-cloud/storage": "^7.15.1",
     "@koa/bodyparser": "^5.1.1",
     "@koa/cors": "^5.0.0",
-    "civkit": "^0.8.3-15926cb",
+    "civkit": "^0.8.3-0869d26",
     "dayjs": "^1.11.13",
     "koa": "^2.15.4",
     "lodash": "^4.17.21",

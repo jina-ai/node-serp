@@ -4,9 +4,9 @@ import { container, singleton } from 'tsyringe';
 import { IntegrityEnvelope } from 'civkit/civ-rpc';
 import bodyParser from '@koa/bodyparser';
 
-import { GlobalAsyncContext } from 'civkit/async-context';
 import { GlobalLogger } from './logger';
 import { TempFileManager } from './temp-file';
+import { AsyncLocalContext } from './async-context';
 
 export const InjectProperty = propertyInjectorFactory(container);
 
@@ -35,7 +35,7 @@ export class RPCRegistry extends KoaRPCRegistry {
 
     constructor(
         protected globalLogger: GlobalLogger,
-        protected ctxMgr: GlobalAsyncContext,
+        protected ctxMgr: AsyncLocalContext,
         protected tempFileManager: TempFileManager,
     ) {
         super(...arguments);
