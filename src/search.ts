@@ -1,44 +1,97 @@
-import { SearchParams, SearchResult, SearchResponse } from './types';
+import { SearchParams, SearchResponse } from './types';
 import { z } from 'zod';
 import { ObjectGeneratorSafe } from './tools';
 
 export async function searchSimulator(params: SearchParams): Promise<SearchResponse> {
   const generator = new ObjectGeneratorSafe();
-
   const maxResults = params.num || 10;
+  const knowledgeCutoff = params.knowledgeCutoff || 'October 2024';
   
+  // Enhanced schema with stronger restrictions and more realistic snippet generation
   const searchResultSchema = z.array(
     z.object({
       title: z.string()
-        .describe('The title of the search result')
+        .describe(`The title of the search result - must be factual and based on real websites that existed as of ${knowledgeCutoff}. No fictional sites.`)
+        .min(5)
         .max(100),
       link: z.string()
-        .describe('The URL of the search result'),
+      .describe(`The URL of the search result - must be a realistic, properly formatted URL with NO placeholders like "example" or "sample". Use authentic patterns, e.g.:
+        - YouTube: https://www.youtube.com/watch?v=dQw4w9WgXcQ (actual video IDs are 11 characters)
+        - Wikipedia: https://en.wikipedia.org/wiki/Artificial_intelligence (actual topic slug)
+        - News sites: https://www.theguardian.com/technology/2023/nov/15/ai-regulation-global-summit (real date/category/slug)
+        - Government sites: https://www.cdc.gov/coronavirus/2019-ncov/index.html (authentic paths)
+        - Academic: https://arxiv.org/abs/2201.08239 (real paper IDs)
+        Must reflect real websites that existed as of ${knowledgeCutoff}. Must be a properly formatted URL without placeholder terms like 'example'.`)
+        .max(300),
       snippet: z.string()
-        .describe('A brief description/snippet of the content')
-        .max(100),
+        .describe(`A fragment of text from the actual content that CONTAINS THE QUERY TERMS. This is NOT a summary - it's an actual extract where the query terms appear, with those terms surrounded by <b> tags. For example, if the query is "climate change", the snippet might be "...effects of <b>climate change</b> on biodiversity include...". Must be based on factual content available as of ${knowledgeCutoff}.`)
+        .min(20)
+        .max(300),
       position: z.number()
         .int()
         .min(1)
-        .describe('The position in search results')
+        .max(maxResults)
+        .describe('The position of this result in the SERP (1-based indexing)')
     })
-  ).max(maxResults).describe(`Array of search results, limited to ${maxResults} items`);
+  ).min(1).max(maxResults).describe(`Generate realistic search engine results limited to ${maxResults} items. Results must be based ONLY on information available as of ${knowledgeCutoff} and reflect what a real search engine would return.`);
 
-  const systemPrompt = `You are a search engine API that generates realistic search results.
-Your task is to generate search results that look like real web pages. Each result should:
-1. Have a realistic title that would appear in search results
-2. Include a plausible URL that follows common web patterns
-3. Contain a natural-sounding snippet/description
-4. Be relevant to the query and location context
-5. Consider the page number for result positioning`;
+  // Improved system prompt focused on reducing hallucination and creating realistic snippets
+  const systemPrompt = `You are a search engine API that generates realistic and factual search results.
+Your task is to simulate what a real search engine would return for the given query based ONLY on information available as of the knowledge cutoff date (${knowledgeCutoff}).
 
-  const userPrompt = `Search parameters:
-- Query: "${params.q}"
-- Country: ${params.gl || 'US'}
-- Language: ${params.hl || 'en'}
-- Location: ${params.location || 'United States'}
-- Results per page: ${maxResults}
-- Page: ${params.page || 1}`;
+IMPORTANT RULES TO FOLLOW:
+1. Only generate results for real websites and web pages that existed before ${knowledgeCutoff}
+2. Each result must contain factually accurate information known before ${knowledgeCutoff}
+3. Include diverse result types: official sites, news articles, blogs, forums, academic sources, etc.
+4. NEVER EVER use placeholder values like "example", "sample", or "placeholder" in URLs
+5. For YouTube URLs, always use actual video IDs (11 characters like "dQw4w9WgXcQ" or "8O_MwlZ2dEk")
+6. All URLs must be complete with proper subdomains, paths, and query parameters as appropriate
+7. For product pages, use realistic product IDs/SKUs (never "product123" or similar placeholders)
+8. For news articles, use actual date-based URL structures (like "/2023/11/15/article-title")
+9. NEVER generate fictional websites, URLs, or speculative content
+
+CRITICAL SNIPPET REQUIREMENTS:
+1. Snippets are NOT summaries - they are ACTUAL FRAGMENTS of text from the page showing where query terms appear
+2. Snippets MUST CONTAIN the query terms, and those terms should be wrapped in <b> tags (e.g., "effects of <b>climate change</b> on biodiversity")
+3. Snippets should be contextual extracts that show how the query terms appear in the content
+4. If the query has multiple terms, try to find fragments where multiple terms appear close together
+5. Snippets should start and end naturally (not mid-word) and include enough context to understand the fragment
+6. It's okay to use "..." to indicate text omission before or after the snippet
+7. For navigational queries (like searching for "Facebook"), include snippets from the target site's homepage description or key pages
+8. If a page is in a different language, provide the snippet in that language with appropriate query term highlighting
+
+SEARCH BEHAVIOR GUIDELINES:
+1. For queries about events after ${knowledgeCutoff}, return only information available up to ${knowledgeCutoff}, showing how a real search engine would handle such queries
+2. Results for page 2+ should be progressively less relevant but still factual
+3. Respect the specified country, language and location for regional relevance
+4. If uncertain about facts as of ${knowledgeCutoff}, return general topic information rather than potentially incorrect specifics
+5. Position top-authority sites (Wikipedia, official sites, major news outlets) higher in results when appropriate
+6. For technical queries, prioritize documentation, forums, and educational resources
+7. Mirror real search engine behavior by including appropriate result diversity based on query intent
+
+This is simulating a production SERP API - your results should be indistinguishable from real search engine results.`;
+
+  // User prompt formatted as a JSON request to reinforce API behavior
+  const userPrompt = JSON.stringify({
+    endpoint: "/api/v1/search",
+    method: "GET",
+    request: {
+      query: params.q,
+      country: params.gl || 'US',
+      language: params.hl || 'en',
+      location: params.location || 'United States',
+      resultsPerPage: maxResults,
+      page: params.page || 1,
+      knowledgeCutoffDate: knowledgeCutoff
+    },
+    requirements: {
+      accuracy: "high", 
+      factuality: "strict",
+      realSites: true,
+      noHallucination: true,
+      snippetBehavior: "extractWithHighlighting"
+    }
+  }, null, 2);
 
   try {
     const response = await generator.generateObject({
@@ -46,7 +99,6 @@ Your task is to generate search results that look like real web pages. Each resu
       schema: searchResultSchema,
       system: systemPrompt,
       messages: [
-        { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ]
     });
@@ -62,4 +114,4 @@ Your task is to generate search results that look like real web pages. Each resu
       usage: { prompt: 0, completion: 0, total: 0 }
     };
   }
-} 
+}

@@ -5,6 +5,7 @@ export interface SearchParams {
   hl?: string;
   num?: number;
   page?: number;
+  knowledgeCutoff?: string;
 }
 
 export interface SearchResult {
