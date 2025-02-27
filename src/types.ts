@@ -1,12 +1,12 @@
 import z, { TypeOf } from 'zod';
 
 export const zSearchParams = z.object({
-  q: z.string(),
-  gl: z.string().optional(),
-  location: z.string().optional(),
-  hl: z.string().optional(),
-  num: z.number().optional(),
-  page: z.number().optional(),
+  q: z.coerce.string(),
+  gl: z.coerce.string().optional(),
+  location: z.coerce.string().optional(),
+  hl: z.coerce.string().optional(),
+  num: z.coerce.number().optional(),
+  page: z.coerce.number().optional(),
 });
 export interface SearchParams extends TypeOf<typeof zSearchParams> {}
 
