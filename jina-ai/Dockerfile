@@ -21,8 +21,10 @@ COPY ./tsconfig.json ./tsconfig.json
 COPY ./jina-ai/config.json ./
 RUN npm run build
 
+COPY ./jina-ai/public ./jina-ai/public
 COPY ./jina-ai/src ./jina-ai/src
 COPY ./jina-ai/tsconfig.json ./jina-ai/tsconfig.json
+
 WORKDIR /app/jina-ai
 RUN npm run build
 
@@ -33,7 +35,6 @@ FROM node:22 AS production
 WORKDIR /app
 
 COPY --from=builder /app ./
-COPY ./jina-ai/public ./jina-ai/public
 # Copy config.json and built files from builder
 
 WORKDIR /app/jina-ai
