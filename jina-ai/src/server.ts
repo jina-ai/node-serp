@@ -18,7 +18,7 @@ import { Finalizer } from './lib/finalizer';
 import { FuncHost } from './api/func';
 
 @singleton()
-export class JinaEmbeddingsServer extends KoaServer {
+export class SerpServer extends KoaServer {
 
     logger = this.globalLogger.child({ service: this.constructor.name });
     assets = new Map<string, WalkOutEntity>();
@@ -120,6 +120,6 @@ export class JinaEmbeddingsServer extends KoaServer {
 
 }
 
-const instance = container.resolve(JinaEmbeddingsServer);
+const instance = container.resolve(SerpServer);
 
 export default instance;
