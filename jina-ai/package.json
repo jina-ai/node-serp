@@ -1,5 +1,5 @@
 {
-  "name": "@jina-ai/node-deepresearch",
+  "name": "@jina-ai/node-serp",
   "version": "1.0.0",
   "main": "dist/app.js",
   "files": [
