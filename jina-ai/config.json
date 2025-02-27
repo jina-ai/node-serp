@@ -1,6 +1,9 @@
 {
     "gemini": {
         "provider": "vertex",
+        "providerOptions": {
+            "location": "us-central1"
+        },
         "options": {
             "maxTokens": 5000,
             "temperature": 0.6
