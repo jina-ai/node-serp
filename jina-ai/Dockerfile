@@ -40,7 +40,7 @@ COPY --from=builder /app ./
 WORKDIR /app/jina-ai
 
 # Set environment variables (Recommended to set at runtime, avoid hardcoding)
-ENV GEMINI_API_KEY=${GEMINI_API_KEY}
+# ENV GEMINI_API_KEY=${GEMINI_API_KEY}
 # ENV OPENAI_API_KEY=${OPENAI_API_KEY}
 # ENV JINA_API_KEY=${JINA_API_KEY}
 

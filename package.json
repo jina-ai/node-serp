@@ -18,6 +18,9 @@
     "yargs": "^17.7.2",
     "zod": "^3.22.4"
   },
+  "optionalDependencies": {
+    "@ai-sdk/google-vertex": "^2.1.19"
+  },
   "devDependencies": {
     "@types/node": "^20.11.16",
     "@types/yargs": "^17.0.32",
