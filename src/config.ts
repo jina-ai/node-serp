@@ -13,11 +13,11 @@ interface ToolConfig {
 
 const toolConfigs: Record<ToolName, ToolConfig> = {
   gemini: {
-    maxTokens: 2000,
+    maxTokens: 5000,
     temperature: 0.6
   },
   fallback: {
-    maxTokens: 2000,
+    maxTokens: 5000,
     temperature: 0.6
   }
 };

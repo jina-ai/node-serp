@@ -5,7 +5,7 @@ import { KNOWLEDGE_CUTOFF } from './config';
 
 export async function searchSimulator(params: SearchParams): Promise<SearchResponse> {
   const generator = new ObjectGeneratorSafe();
-  const maxResults = params.num || 10;
+  const maxResults = Math.min(params.num || 10, 30);
   
   // Enhanced schema with stronger restrictions and more realistic snippet generation
   const searchResultSchema = z.array(
