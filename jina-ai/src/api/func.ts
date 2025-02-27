@@ -109,7 +109,7 @@ export class FuncHost extends RPCHost {
         try {
             const r = await func(rpcReflect.input);
 
-            chargeAmount = _.get(r, 'usage.total') || 0;
+            chargeAmount = _.get(r, 'usage.totalTokens') || 0;
             
             return r;
         } catch (err: any) {

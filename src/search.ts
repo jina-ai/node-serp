@@ -122,7 +122,7 @@ This is simulating a production SERP API - your results should be indistinguisha
     console.error("Failed to generate search results:", error);
     return {
       results: [],
-      usage: { prompt: 0, completion: 0, total: 0 }
+      usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 }
     };
   }
 }

@@ -20,9 +20,9 @@ export interface SearchResult {
 export interface SearchResponse {
   results: SearchResult[];
   usage: {
-    prompt: number;
-    completion: number;
-    total: number;
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
   };
 }
 
