@@ -87,7 +87,7 @@ export class FuncHost extends RPCHost {
         } else if (ctx.ip) {
             const apiRoll = await this.rateLimitControl.simpleRpcIPBasedLimit(rpcReflect, ctx.ip, [rpcReflect.name.toUpperCase()],
                 [
-                    // 20 requests per minute
+                    // 3 requests per minute
                     new Date(Date.now() - 60 * 1000), 3
                 ]
             );
@@ -102,6 +102,8 @@ export class FuncHost extends RPCHost {
                     }, { merge: true }).catch((err) => this.logger.warn(`Failed to log charge amount in apiRoll`, { err }));
                 }
             });
+        } else {
+            this.logger.warn(`No uid or ip found for ${rpcReflect.name}`);
         }
 
         try {
