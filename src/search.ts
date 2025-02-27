@@ -15,24 +15,28 @@ export async function searchSimulator(params: SearchParams): Promise<SearchRespo
         .min(5)
         .max(100),
       link: z.string()
-      .describe(`The URL of the search result - must be a realistic, properly formatted URL with NO placeholders like "example" or "sample". Use authentic patterns, e.g.:
-        - YouTube: https://www.youtube.com/watch?v=dQw4w9WgXcQ (actual video IDs are 11 characters)
-        - Wikipedia: https://en.wikipedia.org/wiki/Artificial_intelligence (actual topic slug)
-        - News sites: https://www.theguardian.com/technology/2023/nov/15/ai-regulation-global-summit (real date/category/slug)
-        - Government sites: https://www.cdc.gov/coronavirus/2019-ncov/index.html (authentic paths)
-        - Academic: https://arxiv.org/abs/2201.08239 (real paper IDs)
-        Must reflect real websites that existed as of ${KNOWLEDGE_CUTOFF}. Must be a properly formatted URL without placeholder terms like 'example'.`)
+        .describe(`The URL of the search result - must be a realistic, properly formatted URL with NO placeholders like "example" or "sample". Use authentic patterns, e.g.:
+          - YouTube: https://www.youtube.com/watch?v=dQw4w9WgXcQ (actual video IDs are 11 characters)
+          - Wikipedia: https://en.wikipedia.org/wiki/Artificial_intelligence (actual topic slug)
+          - News sites: https://www.theguardian.com/technology/2023/nov/15/ai-regulation-global-summit (real date/category/slug)
+          - Government sites: https://www.cdc.gov/coronavirus/2019-ncov/index.html (authentic paths)
+          - Academic: https://arxiv.org/abs/2201.08239 (real paper IDs)
+          Must reflect real websites that existed as of ${KNOWLEDGE_CUTOFF}. Must be a properly formatted URL without placeholder terms like 'example'.`)
         .min(10)
         .max(300),
       snippet: z.string()
         .describe(`A fragment of text from the actual content that CONTAINS THE QUERY TERMS. This is NOT a summary - it's an actual extract where the query terms appear, with those terms surrounded by <b> tags. For example, if the query is "climate change", the snippet might be "...effects of <b>climate change</b> on biodiversity include...". Must be based on factual content available as of ${KNOWLEDGE_CUTOFF}.`)
         .min(20)
-        .max(300),
+        .max(500),
       position: z.number()
         .int()
         .min(1)
         .max(maxResults)
-        .describe('The position of this result in the SERP (1-based indexing)')
+        .describe('The position of this result in the SERP (1-based indexing)'),
+      domain:  z.string()
+          .describe('The official name of the website/company that owns this domain (e.g., "YouTube", "Wikipedia", "The New York Times"). Use the actual brand name, not just the domain name like jina.ai, google.com')
+          .min(2)
+          .max(50)
     })
   ).min(1).max(maxResults).describe(`Generate realistic search engine results limited to ${maxResults} items. Results must be based ONLY on information available as of ${KNOWLEDGE_CUTOFF} and reflect what a real search engine would return.`);
 
@@ -60,6 +64,10 @@ CRITICAL SNIPPET REQUIREMENTS:
 6. It's okay to use "..." to indicate text omission before or after the snippet
 7. For navigational queries (like searching for "Facebook"), include snippets from the target site's homepage description or key pages
 8. If a page is in a different language, provide the snippet in that language with appropriate query term highlighting
+
+DOMAIN PROFILE REQUIREMENTS:
+1. Each domain must be ACCURATE and REALISTIC for the actual website
+2. The domain should be the official company/site name (e.g., "The New York Times" not just "nytimes")
 
 SEARCH BEHAVIOR GUIDELINES:
 1. For queries about events after ${KNOWLEDGE_CUTOFF}, return only information available up to ${KNOWLEDGE_CUTOFF}, showing how a real search engine would handle such queries
@@ -90,7 +98,8 @@ This is simulating a production SERP API - your results should be indistinguisha
       factuality: "strict",
       realSites: true,
       noHallucination: true,
-      snippetBehavior: "extractWithHighlighting"
+      snippetBehavior: "extractWithHighlighting",
+      includeDomainProfiles: true
     }
   }, null, 2);
 
