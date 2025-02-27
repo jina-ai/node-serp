@@ -33,6 +33,7 @@ FROM node:22 AS production
 WORKDIR /app
 
 COPY --from=builder /app ./
+COPY ./jina-ai/public ./public
 # Copy config.json and built files from builder
 
 WORKDIR /app/jina-ai
