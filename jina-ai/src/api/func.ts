@@ -5,10 +5,10 @@ import { GlobalLogger } from '../lib/logger';
 import { Ctx, Method, RPCReflect } from '../lib/registry';
 import { marshalErrorLike } from 'civkit/lang';
 import { JinaEmbeddingsAuthDTO } from '../dto/jina-embeddings-auth';
-import { GlobalAsyncContext } from 'civkit/async-context';
 import { Context } from 'koa';
 import { InsufficientBalanceError } from '../lib/errors';
 import { RateLimitControl, RateLimitDesc } from '../lib/rate-limit';
+import { AsyncLocalContext } from '../lib/async-context';
 
 const func = require('../../..').default;
 
@@ -20,7 +20,7 @@ export class FuncHost extends RPCHost {
     constructor(
         protected globalLogger: GlobalLogger,
         protected rateLimitControl: RateLimitControl,
-        protected threadLocal: GlobalAsyncContext,
+        protected threadLocal: AsyncLocalContext,
     ) {
         super(...arguments);
     }
@@ -107,7 +107,11 @@ export class FuncHost extends RPCHost {
         }
 
         try {
-            return await func(rpcReflect.input);
+            const r = await func(rpcReflect.input);
+
+            chargeAmount = _.get(r, 'usage.total') || 0;
+            
+            return r;
         } catch (err: any) {
             if (typeof err === 'object' && err.name === 'ZodError') {
                 const issue0 = err.issues[0];
