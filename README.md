@@ -1,5 +1,5 @@
 # node-serp
-[Demo](https://jina.ai/llm-serp-demo)|[API](https://jina.ai/api-dashboard/llm-serp)
+[Demo](https://jina.ai/llm-serp-demo) | [API](https://jina.ai/api-dashboard/llm-serp)
 
 ## Setup
 
