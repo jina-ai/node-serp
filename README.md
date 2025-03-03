@@ -1,5 +1,5 @@
 # node-serp
-[Demo](https://jina.ai/llm-serp-demo) | [API](https://jina.ai/api-dashboard/llm-serp)
+[Demo](https://jina.ai/llm-serp-demo) | [API](https://jina.ai/api-dashboard/llm-serp) | [Why?](https://jina.ai/news/llm-as-serp-search-engine-result-pages-from-large-language-models/#where-llm-as-serp-can-be-useful)
 
 ## Setup
 
