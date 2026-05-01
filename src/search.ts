@@ -114,9 +114,15 @@ This is simulating a production SERP API - your results should be indistinguisha
       ]
     });
     
+    // ai SDK v6 renamed usage fields: inputTokens/outputTokens. Map to legacy shape for API stability.
+    const u: any = response.usage || {};
     return {
       results: response.object,
-      usage: response.usage
+      usage: {
+        promptTokens: u.promptTokens ?? u.inputTokens ?? 0,
+        completionTokens: u.completionTokens ?? u.outputTokens ?? 0,
+        totalTokens: u.totalTokens ?? ((u.inputTokens ?? 0) + (u.outputTokens ?? 0)),
+      },
     };
   } catch (error) {
     console.error("Failed to generate search results:", error);

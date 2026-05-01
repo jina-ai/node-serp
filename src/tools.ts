@@ -28,7 +28,7 @@ export class ObjectGeneratorSafe {
         prompt,
         system,
         messages,
-        maxTokens: getModelConfig(model).maxTokens,
+        maxOutputTokens: getModelConfig(model).maxTokens,
         temperature: getModelConfig(model).temperature,
       });
 
@@ -55,7 +55,7 @@ export class ObjectGeneratorSafe {
             model: getModel(model),
             schema,
             prompt: `Extract the desired information from this text: \n ${failedOutput}`,
-            maxTokens: getModelConfig(model).maxTokens,
+            maxOutputTokens: getModelConfig(model).maxTokens,
             temperature: getModelConfig(model).temperature,
           });
         }
