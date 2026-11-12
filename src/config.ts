@@ -40,9 +40,9 @@ export function getModel(name: string = 'gemini') {
   if (name === 'gemini') {
     if (conf.provider === 'vertex') {
       const createVertex = require('@ai-sdk/google-vertex').createVertex;
-      return createVertex({ project: process.env.GCLOUD_PROJECT, ...conf.providerOptions })('gemini-3.1-flash-lite-preview');
+      return createVertex({ project: process.env.GCLOUD_PROJECT, ...conf.providerOptions })('gemini-3.5-flash-lite');
     }
-    return google('gemini-3.1-flash-lite-preview');
+    return google('gemini-3.5-flash-lite');
   }
 
   throw new Error(`Unknown model: ${name}`);
